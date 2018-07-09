@@ -1,0 +1,20 @@
+{
+  "name": "mono-webpack",
+  "version": "1.0.0",
+  "description": "为了加深自己对 Webpack 理解，同时也能帮助到其他想要深入理解 Webpack 原理的同学。 我开了这样的一个仓库。",
+  "main": "src/main.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/azl397985856/mono-webpack.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/azl397985856/mono-webpack/issues"
+  },
+  "homepage": "https://github.com/azl397985856/mono-webpack#readme"
+}
