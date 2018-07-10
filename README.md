@@ -29,3 +29,46 @@ module.exports = {
 配置方面，只支持 entry 和 output。
 
 模块方面仅仅只是 es6 模块方案，且仅支持相对路径引用，后缀不可省略。
+
+### 热身
+
+开始正式的讲解之前，有必要先来了解一下 nodejs api。
+因为我们的一些操作是需要依赖 nodejs 提供的底层文件读写的 api 的。
+
+### bundle
+
+我们要实现打包的方法，我将其命名为`bundle`.
+那么 bundle 做的就是两件事情， 一件事是构建 modules，另一件是将生成的代码（字符串）输出（根据配置的 output）。
+
+输出的代码比较简单，直接调用 nodejs fs api 就可以了。
+
+我们重点讲解一下如何`构建 modules`，待会再讲解`输出代码`.
+
+#### 构建 modules
+
+以下代码省略了一部分：
+
+```js
+function bundle(options) {
+    ...
+  // 构建所有模块(modules)
+  const modules = [entryModule].concat(createModules(id, entryModule));
+  // 输出环节
+  const emit = compose(
+    writeDisk(output),
+    createAssets,
+    eliminateFields
+  );
+
+  return emit(modules);
+}
+```
+
+#### 输出代码
+
+## 总结
+
+这一节带大家完成了一个打包工具最简单的部分，如何根据入口文件扫描依赖，并且进行模块化加载等。
+其中还借助了 babel 完成了一些转义工作。如果大家 ast 或者代码转化有兴趣，我会出一个专门的文章讲解。
+
+下一节我们引入 loaders(文章暂时未更新，敬请期待～)

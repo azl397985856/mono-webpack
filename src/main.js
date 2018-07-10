@@ -127,11 +127,6 @@ function bundle(options) {
   return emit(modules);
 }
 
-// 测试
-bundle({
-  entry: "../examples/simple/index.js",
-  output: {
-    path: "dist",
-    filename: "bundle.js"
-  }
-});
+module.exports = {
+  bundle
+};

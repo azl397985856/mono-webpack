@@ -5,8 +5,9 @@
   "main": "src/main.js",
   "scripts": {
     "test": "jest",
-    "clean": "rm -rf lib",
-    "dev": "node src/main.js"
+    "coverage": "jest --coverage",
+    "clean": "rm -rf dist",
+    "demo": "node examples/simple/entry"
   },
   "repository": {
     "type": "git",
@@ -25,5 +26,9 @@
     "babel-traverse": "^6.26.0",
     "babylon": "^6.18.0",
     "mkdirp": "^0.5.1"
+  },
+  "devDependencies": {
+    "babel-plugin-rewire": "^1.1.0",
+    "jest": "^23.3.0"
   }
 }
