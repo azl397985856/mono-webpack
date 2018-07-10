@@ -32,8 +32,84 @@ module.exports = {
 
 ### 热身
 
-开始正式的讲解之前，有必要先来了解一下 nodejs api。
-因为我们的一些操作是需要依赖 nodejs 提供的底层文件读写的 api 的。
+我们的代码中有几处使用了 nodejs 的内置模块。开始正式的讲解之前，有必要先来了解一下 这几个 nodejs api。
+
+#### fs.readFileSync
+
+nodejs 有很多同步异步版本的 api，很明显这个 api 就是这样。
+套路是异步版本的名字后面加 Sync。比如`fs.readFile`是异步读取文件的，`fs.readFileSync`则是同步读取文件的。关于同步和异步的区别，如果不清楚，
+请自行查阅相关资料。
+
+完整的函数签名是`fs.readFileSync(path[, options])`,其中 path 是一个绝对路径。函数签名的详细参数介绍可以直接访问官网查看。
+
+它的作用就是同步读取一个文件，并将`文件内容以返回值的形式返回`。
+
+#### fs.writeFile
+
+经过前面的介绍，其实大家应该可以猜到 fs.writeFile 也是有同步的版本的，
+就是 fs.writeFileSync, 只不过我没有用到。
+
+完整的函数签名是`fs.writeFile(file, data[, options], callback)`,其中 path 是一个绝对路径。函数签名的详细参数介绍可以直接访问官网查看。
+
+> 值得注意的是如果试图写入的文件路径不存在，会报错。因此我使用 mkdir 库解决这个问题
+
+它的作用就是异步写入一个文件，并在`内容写入完成的时候触发回调函数将出错信息或者读取的内容传给回调函数`。
+
+#### path.join
+
+完整的函数签名是`path.join([...paths])`
+
+功能就是把多个路径拼接起来返回。
+举个例子：
+
+```bash
+path.join('/foo', 'bar', 'baz/asdf', 'quux', '..');
+// Returns: '/foo/bar/baz/asdf'
+```
+
+#### path.resolve
+
+函数签名和上面的`path.join`类似。 完整的函数签名为：`path.resolve([...paths])`
+简单来说，你可以把它看成是你在命令行使用 cd 切换目录。
+举个例子：
+
+```bash
+path.resolve('/foo/bar', './baz');
+// Returns: '/foo/bar/baz'
+
+path.resolve('/foo/bar', '/tmp/file/');
+// Returns: '/tmp/file'
+```
+
+#### \_\_dirname
+
+直接返回当前的模块所在的目录。 它和 path.dirname()是一样的。
+
+```js
+__dirname === path.dirname(); // true
+```
+
+除了 nodejs 的内置模块，还使用了 npm 的第三方模块。
+这里做一下简单的介绍。
+
+#### mkdirp
+
+一句话介绍: `Like mkdir -p, but in node.js!`
+
+#### babylon
+
+它的功能非常丰富，在这里我用它将代码转化为 AST(抽象语法树)。
+如果对这个概念不是很熟悉的，建议先学习（至少知道做了什么）再继续往下看。
+
+#### babel-core
+
+babel-core 是 babel 的核心模块，它提供了很多插件和 preset 扩展它的功能，
+这里我们使用 babel-preset-env 这个 babel 内置的 preset 来讲我们的代码转化为
+兼容性更强的代码。
+
+#### babel-traverse
+
+这个也是 babel 家族的一个库。用于提供用户访问 ast 节点的能力,官方称之为访问者（visitor）。 在这里我们使用它来完成依赖的收集，就是将文件的 import 语句 收集起来。
 
 ### bundle
 
