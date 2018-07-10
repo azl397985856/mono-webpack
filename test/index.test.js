@@ -67,7 +67,7 @@ describe("mono-webpack", () => {
   it("eliminateFields", () => {
     const eliminated = eliminateFields(modules);
     eliminated.forEach(module => {
-      // 判断时候将dependencies和filename删除了
+      // 判断是否将dependencies和filename删除了
       expect(module.dependencies).toBe(undefined);
       expect(module.filename).toBe(undefined);
     });
