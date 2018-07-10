@@ -1,12 +1,6 @@
 # 从零开始开发一个 Webpack
 
-为了加深自己对 Webpack 理解，同时也能帮助到其他想要深入理解 Webpack 原理的同学。
-我开了这样的一个仓库。
-
-这个仓库分为两部分，一部分是项目主体，也就是 master 分支。这部分保持最新的代码，并尽可能实现 Webpack 的新特性。
-
-另一部分是供大家学习的部分，分支名称以 lecture 开头，大家可以切换到对应分支，查看相应特性的代码和课程介绍。
-课程目录见后面`课程列表部分`。 大家也可以通过 [github commit](https://github.com/azl397985856/mono-webpack/commits/master) 功能进行比较，查看代码的变更。
+这个是从零开始开发一个 Webpack 的第一章，本章主要实现一个模块打包系统的最基本功能，而且为了教学方便，功能可能不完整。
 
 ## 先行知识
 
@@ -18,25 +12,20 @@
 
 ## 开始学习
 
-如果你想学习的话，请切换到对应分支。
+我直接从 webpack 官网拿了一个最简单的例子来介绍：
 
-比如你想学习第一课，就切换到 lecture/part1 分支 ，想学习第二课，就切换到 lecture/part2 分支，依次类推。
+```js
+const path = require("path");
 
-### 课程列表
+module.exports = {
+  entry: "./path/to/my/entry/file.js",
+  output: {
+    path: path.resolve(__dirname, "dist"),
+    filename: "my-first-webpack.bundle.js"
+  }
+};
+```
 
-现在已经完成了 1-5 章内容的草稿，并计划在 2018-07 月份进行完善和纠错。
-其他章节部分计划八月份实现。如果你特别感兴趣，请在 issue 区域留言，也许会提前也不一定。
+配置方面，只支持 entry 和 output。
 
-> 草稿，随时可能变更
-
-1.  完成最基本的功能
-
-2.  增加 loader
-
-3.  增加 plugin
-
-...未完待续
-
-## Licence
-
-MIT
+模块方面仅仅只是 es6 模块方案，且仅支持相对路径引用，后缀不可省略。

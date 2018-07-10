@@ -4,7 +4,9 @@
   "description": "为了加深自己对 Webpack 理解，同时也能帮助到其他想要深入理解 Webpack 原理的同学。 我开了这样的一个仓库。",
   "main": "src/main.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "clean": "rm -rf lib",
+    "dev": "node src/main.js"
   },
   "repository": {
     "type": "git",
@@ -16,5 +18,12 @@
   "bugs": {
     "url": "https://github.com/azl397985856/mono-webpack/issues"
   },
-  "homepage": "https://github.com/azl397985856/mono-webpack#readme"
+  "homepage": "https://github.com/azl397985856/mono-webpack#readme",
+  "dependencies": {
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "babel-traverse": "^6.26.0",
+    "babylon": "^6.18.0",
+    "mkdirp": "^0.5.1"
+  }
 }
