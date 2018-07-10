@@ -29,7 +29,7 @@
 
 > 草稿，随时可能变更
 
-1.  完成最基本的功能
+1.  [完成最基本的功能](https://github.com/azl397985856/mono-webpack/tree/lecture/part-1)
 
 2.  增加 loader
 
