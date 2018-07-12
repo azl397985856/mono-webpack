@@ -33,7 +33,7 @@ const writeDisk = output => content => {
   );
 };
 
-//  生成chunk
+//  生成module
 function createModule(id, absoluteEntryPath) {
   const dependencies = [];
 

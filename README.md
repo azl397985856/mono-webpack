@@ -113,14 +113,18 @@ babel-core 是 babel 的核心模块，它提供了很多插件和 preset 扩展
 
 ### bundle
 
+有了上面的知识了，我们就着手开始实现了。
 我们要实现打包的方法，我将其命名为`bundle`.
-那么 bundle 做的就是两件事情， 一件事是构建 modules，另一件是将生成的代码（字符串）输出（根据配置的 output）。
+那么 bundle 做的就是两件事情， 一件事是构建 modules（需要大家对 es6 模块有了解），另一件是将生成的代码（字符串）输出（根据配置的 output）。
 
 输出的代码比较简单，直接调用 nodejs fs api 就可以了。
 
 我们重点讲解一下如何`构建 modules`，待会再讲解`输出代码`.
 
 #### 构建 modules
+
+`createModules`功能就是构建整个项目的 modules，它会解析 module 的依赖，解析的原理就是静态分析，
+如果有 import 'xxx' 这样的语句（这里不考虑动态引入 import('xxx')）就将其加入到依赖中。然后递归调用，从而构造出整个项目的 modules
 
 以下代码省略了一部分：
 
@@ -140,7 +144,142 @@ function bundle(options) {
 }
 ```
 
+我们来看下转化 module 中最重要的`createModule`方法。它接受两个参数一个是 id，另一个是绝对路径。
+
+我们通过绝对路径来读取文件内容，然后使用`babylon`将其转化为`ast`，然后使用`babel-babylon`进行遍历,
+目的其实就是为了找出该模块的依赖，然后继续递归调用，知道找到所有代码，这就是传说中的依赖树（图）。
+
+> id 会被用到后面 require 使用。
+
+```js
+function createModule(id, absoluteEntryPath) {
+  const dependencies = [];
+
+  // 读取入口文件
+  const content = fs.readFileSync(absoluteEntryPath, {
+    encoding: "utf-8"
+  });
+  // 转化为ast
+  const ast = babylon.parse(content, {
+    sourceType: "module"
+  });
+
+  // 找到依赖
+  babylon(ast, {
+    ImportDeclaration({ node }) {
+      dependencies.push(node.source.value);
+    }
+  });
+
+  // 将其转化为兼容性更强的代码
+  // info: 放到最后，否则ImportDeclaration visitor不生效
+  const code = babel.transformFromAst(ast, null, {
+    presets: ["env"]
+  }).code;
+
+  return {
+    dependencies,
+    id,
+    filename: absoluteEntryPath,
+    code,
+    mapping: {}
+  };
+}
+```
+
+这里还涉及到一个方法，没那么重要，代码如下：
+
+其实就是递归调用，并给所有的 module 添加 mapping
+
+> mapping 会被用到后面 require 使用。
+
+```js
+function createModules(id, module) {
+  let modules = [];
+  // 递归dependencies
+  const { dependencies, filename } = module;
+
+  dependencies.forEach(relativePath => {
+    const absolutePath = _path.resolve(_path.dirname(filename), relativePath);
+    const _module = createModule(id, absolutePath);
+    module.mapping[relativePath] = id;
+    id = id + 1;
+    modules = modules.concat(_module);
+    if (_module.dependencies.length > 0) {
+      modules = modules.concat(createModules(id, _module));
+    }
+  });
+
+  return modules;
+}
+```
+
+到这里我们已经得到了 modules 数组。
+
 #### 输出代码
+
+得到了 modules 数组，我们需要将其转化为可以执行的代码。
+
+我们继续看下代码:
+
+```js
+const emit = compose(
+  writeDisk(output),
+  createAssets,
+  eliminateFields
+);
+```
+
+可以看出主要进行了两个工作，一个是`createAssets`一个是`writeDisk`.
+其中`writeDisk`就是直接 fs.writeFile 输出到文件系统，这里不赘述。重点讲一下 createAssets，
+即如何根据 modules 生成目标代码（我称之为 assets）。
+
+思考一个问题，我们的代码是基于 es6 module system 的。 拥有 import(其实已经被我转化为 require 了),module
+以及 exports 这些东西，可是浏览器不一定识别，因此需要让其识别。
+
+我们的做法是 fake 这些变量，然后将其作为参数传给函数，然后将 module 代码在函数中执行。
+代码如下：
+
+```js
+function webpackRequire(id) {
+  const { code, mapping } = modules[id];
+  // 这个是给fake的require
+  function require(name) {
+    return webpackRequire(mapping[name]);
+  }
+  // 这个是fake的module和module.exports
+  const module = { exports: {} };
+  const wrap = new Function("require", "module", "exports", code);
+  // 从这里可以看出module.exports和exports是同一个东西
+  // module.exports === exports // true
+  // 当然了，上面为true的前提是你没有手动改变二者的指向
+  wrap(require, module, module.exports);
+  return module.exports;
+}
+```
+
+将 module 转化为 assets 的代码如下：
+
+```js
+function createAssets(modules) {
+  // 包裹代码
+  return `
+  (function(modules) {
+    function webpackRequire(id) {
+      const { code, mapping } = modules[id];
+      function require(name) {
+        return webpackRequire(mapping[name]);
+      }
+      const module = { exports : {} };
+      const wrap = new Function("require", "module", "exports", code);
+      wrap(require, module, module.exports);
+      return module.exports;
+    }
+    webpackRequire(0);
+  })(${JSON.stringify(modules)})
+`;
+}
+```
 
 ## 总结
 
