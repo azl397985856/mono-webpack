@@ -2,13 +2,10 @@ const fs = require("fs");
 const _path = require("path");
 const mkdirp = require("mkdirp");
 const babylon = require("babylon");
-const babel = require("babel-core");
 const traverse = require("babel-traverse").default;
 
-// utils
-const { compose, eliminateFields } = require("./utils");
-
-// function applyLoaders(loaders, module) {}
+const { compose, eliminateFields, composePromise } = require("./utils");
+const { applyLoaders } = require("./applyLoaders");
 
 // function applyPlugins(plugins, asset) {}
 
@@ -34,30 +31,32 @@ const writeDisk = output => content => {
 };
 
 //  生成chunk
-function createModule(id, absoluteEntryPath) {
+function createModule(id, absoluteEntryPath, rules) {
   const dependencies = [];
 
   // 读取入口文件
-  const content = fs.readFileSync(absoluteEntryPath, {
-    encoding: "utf-8"
-  });
-  // 转化为ast
-  const ast = babylon.parse(content, {
-    sourceType: "module"
-  });
+  const readFileSyncByFilename = filename =>
+    fs.readFileSync(filename, {
+      encoding: "utf-8"
+    });
 
-  // 找到依赖
-  traverse(ast, {
-    ImportDeclaration({ node }) {
-      dependencies.push(node.source.value);
-    }
-  });
+  const content = readFileSyncByFilename(absoluteEntryPath);
 
-  // 将其转化为兼容性更强的代码
-  // info: 放到最后，否则ImportDeclaration visitor不生效
-  const code = babel.transformFromAst(ast, null, {
-    presets: ["env"]
-  }).code;
+  if (/\.js$/.test(absoluteEntryPath)) {
+    // 转化为ast
+    const ast = babylon.parse(content, {
+      sourceType: "module"
+    });
+    // 找到依赖
+    traverse(ast, {
+      ImportDeclaration({ node }) {
+        const filename = node.source.value;
+        dependencies.push(filename);
+      }
+    });
+  }
+
+  const code = applyLoaders(absoluteEntryPath, rules, content);
 
   return {
     dependencies,
@@ -68,19 +67,19 @@ function createModule(id, absoluteEntryPath) {
   };
 }
 
-function createModules(id, module) {
+function createModules(id, module, rules) {
   let modules = [];
   // 递归dependencies
   const { dependencies, filename } = module;
 
   dependencies.forEach(relativePath => {
     const absolutePath = _path.resolve(_path.dirname(filename), relativePath);
-    const _module = createModule(id, absolutePath);
+    const _module = createModule(id, absolutePath, rules);
     module.mapping[relativePath] = id;
     id = id + 1;
     modules = modules.concat(_module);
     if (_module.dependencies.length > 0) {
-      modules = modules.concat(createModules(id, _module));
+      modules = modules.concat(createModules(id, _module, rules));
     }
   });
 
@@ -108,15 +107,17 @@ function createAssets(modules) {
 
 // 核心方法
 function bundle(options) {
-  const { entry, output } = options;
+  const { entry, output, module } = options;
 
   let id = 0;
 
   const absoluteEntryPath = _path.resolve(__dirname, entry);
   // 先创建入口文件模块（module）
-  const entryModule = createModule(id++, absoluteEntryPath);
+  const entryModule = createModule(id++, absoluteEntryPath, module.rules);
   // 构建所有模块(modules)
-  const modules = [entryModule].concat(createModules(id, entryModule));
+  const modules = [entryModule].concat(
+    createModules(id, entryModule, module.rules)
+  );
   // 输出环节
   const emit = compose(
     writeDisk(output),

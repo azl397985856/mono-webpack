@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "6to5-core": "^3.6.5",
+    "6to5-loader": "^3.0.0"
+  }
+}
