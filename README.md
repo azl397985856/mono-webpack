@@ -147,4 +147,4 @@ function bundle(options) {
 这一节带大家完成了一个打包工具最简单的部分，如何根据入口文件扫描依赖，并且进行模块化加载等。
 其中还借助了 babel 完成了一些转义工作。如果大家 ast 或者代码转化有兴趣，我会出一个专门的文章讲解。
 
-下一节我们引入 loaders(文章暂时未更新，敬请期待～)
+下一节我们[引入 loaders](https://github.com/azl397985856/mono-webpack/tree/lecture/part-2)
