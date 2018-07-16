@@ -1,3 +1,5 @@
+const { compose } = require("./utils");
+
 const applyLoaders = (fullpath, rules, content) => {
   let ret = content;
   let hit = false;
