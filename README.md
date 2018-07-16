@@ -8,6 +8,8 @@
 另一部分是供大家学习的部分，分支名称以 lecture 开头，大家可以切换到对应分支，查看相应特性的代码和课程介绍。
 课程目录见后面`课程列表部分`。 大家也可以通过 [github commit](https://github.com/azl397985856/mono-webpack/commits/master) 功能进行比较，查看代码的变更。
 
+这里是我在我们组内进行分享的时候做的一个[ppt](https://slides.com/azl397985856/webpack#/)， 如果大家对如何开发一个打包器还是很模糊建议看一下。
+
 ## 先行知识
 
 学习这个课程之前呢，需要各位对 Webpack 的 API 有一定的了解。
