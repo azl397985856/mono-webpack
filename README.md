@@ -19,10 +19,10 @@
 > loader 让 webpack 能够去处理那些非 JavaScript 文件（webpack 自身只理解 JavaScript）。loader 可以将所有类型的文件转换为 webpack 能够处理的有效模块，然后你就可以利用 webpack 的打包能力，对它们进行处理。
 > 本质上，webpack loader 将所有类型的文件，转换为应用程序的依赖图（和最终的 bundle）可以直接引用的模块。
 
-在 webpack 的配置中 loader 有两个目标：
+在 webpack 的配置中 loader 有两个属性比较重要：
 
-test 属性，用于标识出应该被对应的 loader 进行转换的某个或某些文件。
-use 属性，表示进行转换时，应该使用哪个 loader。
+- test 属性，用于标识出应该被对应的 loader 进行转换的某个或某些文件。
+- use 属性，表示进行转换时，应该使用哪个 loader。
 
 我直接从 webpack 官网拿了一个 loader 的例子来介绍：
 
@@ -44,7 +44,7 @@ module.exports = {
 
 > “嘿，webpack 编译器，当你碰到「在 require()/import 语句中被解析为 '.txt' 的路径」时，在你对它打包之前，先使用 raw-loader 转换一下。”
 
-### loader 原理
+### loader 就是函数
 
 讲 loader 原理之前呢，先来看下 loader 的特性。以下内容摘自官网：
 
@@ -169,6 +169,12 @@ const applyLoaders = (fullpath, rules, content) => {
 ```
 
 ### 最终效果
+
+由于我并没有实现 webpack loader 的异步 api，我使用了一个 babel-core 的原始版本 6to5-loader(因为他是同步的)。
+
+另外我自己写了一个 loader`customLoader`,代码就一行，功能也很简单就是将单行注释给删除掉。
+
+完整示例代码如下：
 
 ```js
 // 这是我们的webpack核心代码
