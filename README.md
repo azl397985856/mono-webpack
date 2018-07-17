@@ -218,4 +218,4 @@ bundle({
 
 这一节带大家完成了 loader 的支持。
 
-下一节我们引入 plugin(文章暂时未更新，敬请期待～)
+下一节我们引入 [plugin](https://github.com/azl397985856/mono-webpack/tree/lecture/part-3)
