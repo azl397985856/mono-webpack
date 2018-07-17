@@ -1,6 +1,6 @@
 const { compose } = require("./utils");
 
-const applyLoaders = (fullpath, rules, content) => {
+const applyLoaders = (fullpath, rules = [], content) => {
   let ret = content;
   let hit = false;
   rules.forEach(rule => {
@@ -15,7 +15,7 @@ const applyLoaders = (fullpath, rules, content) => {
       ret = compose(...loaders)(content);
     }
   });
-  if (!hit) {
+  if (!hit && !/\.js$/.test(fullpath)) {
     console.log(
       `${fullpath}: You may need an appropriate loader to handle this file type.`
     );

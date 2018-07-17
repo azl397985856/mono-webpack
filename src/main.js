@@ -7,27 +7,48 @@ const traverse = require("babel-traverse").default;
 const { compose, eliminateFields, composePromise } = require("./utils");
 const { applyLoaders } = require("./applyLoaders");
 
-// function applyPlugins(plugins, asset) {}
+const events = {};
+
+function beforeEmit(plugins, modules) {
+  if (events.beforeEmit && events.beforeEmit.length > 0) {
+    events.beforeEmit.forEach(event => {
+      event.handler && event.handler(modules);
+    });
+  }
+}
+
+function afterEmit(plugins, compilation) {
+  if (events.afterEmit && events.afterEmit.length > 0) {
+    events.afterEmit.forEach(event => {
+      event.handler && event.handler(compilation);
+    });
+  }
+}
+
+function addEvent(eventName, handler) {
+  if (events[eventName]) {
+    event.push({
+      eventName,
+      handler
+    });
+  } else {
+    events[eventName] = [
+      {
+        eventName,
+        handler
+      }
+    ];
+  }
+}
 
 const writeDisk = output => content => {
   const { path, filename } = output;
   // make paths if not exist
   mkdirp(path);
-  return fs.writeFile(
-    _path.join(path, filename),
-    content,
-    {
-      encoding: "utf-8"
-    },
-    (err, data) => {
-      if (err) {
-        throw err;
-      }
-      console.log("bundle finished...");
-
-      console.log("this package was created by lucifer@duiba");
-    }
-  );
+  fs.writeFileSync(_path.join(path, filename), content, {
+    encoding: "utf-8"
+  });
+  return content;
 };
 
 //  生成chunk
@@ -107,25 +128,61 @@ function createAssets(modules) {
 
 // 核心方法
 function bundle(options) {
-  const { entry, output, module } = options;
+  const compiler = {
+    hooks: {
+      emit: {
+        tap(pluginName, handler) {
+          addEvent("beforeEmit", handler);
+        }
+      },
+      afterEmit: {
+        tap(pluginName, handler) {
+          addEvent("afterEmit", handler);
+        }
+      }
+    },
+    apply(...plugins) {
+      compiler.plugins = plugins;
+      for (const plugin of plugins) {
+        // 向对应hook注册事件
+        plugin.apply(compiler);
+      }
+    },
+    run(cb) {
+      try {
+        const { entry, output, module = {} } = options;
 
-  let id = 0;
+        let id = 0;
 
-  const absoluteEntryPath = _path.resolve(__dirname, entry);
-  // 先创建入口文件模块（module）
-  const entryModule = createModule(id++, absoluteEntryPath, module.rules);
-  // 构建所有模块(modules)
-  const modules = [entryModule].concat(
-    createModules(id, entryModule, module.rules)
-  );
-  // 输出环节
-  const emit = compose(
-    writeDisk(output),
-    createAssets,
-    eliminateFields
-  );
+        const absoluteEntryPath = _path.resolve(__dirname, entry);
+        // 先创建入口文件模块（module）
+        const entryModule = createModule(id++, absoluteEntryPath, module.rules);
+        // 构建所有模块(modules)
+        const modules = [entryModule].concat(
+          createModules(id, entryModule, module.rules)
+        );
+        // emit之前，只有modules
+        beforeEmit(compiler.plugins, modules);
+        // 输出环节
+        const emit = compose(
+          writeDisk(output),
+          createAssets,
+          eliminateFields
+        );
 
-  return emit(modules);
+        const compilation = emit(modules);
+        // emit之后，有了compilation
+        afterEmit(compiler.plugins, compilation);
+
+        cb(null, compilation);
+      } catch (err) {
+        cb(err, null);
+      }
+      return true;
+    }
+  };
+
+  return compiler;
 }
 
 module.exports = {

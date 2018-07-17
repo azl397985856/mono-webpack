@@ -7,7 +7,7 @@
     "test": "jest",
     "coverage": "jest --coverage",
     "clean": "rm -rf dist",
-    "demo": "node examples/loaders/entry"
+    "demo": "node examples/plugins/entry"
   },
   "repository": {
     "type": "git",
