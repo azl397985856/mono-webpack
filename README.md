@@ -35,7 +35,7 @@
 
 2.  [增加 loader](https://github.com/azl397985856/mono-webpack/tree/lecture/part-2)
 
-3.  增加 plugin
+3.  [增加 plugin](https://github.com/azl397985856/mono-webpack/tree/lecture/part-2)
 
 4.  模块解析
 
