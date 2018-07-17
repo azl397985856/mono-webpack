@@ -26,9 +26,11 @@ module.exports = {
 };
 ```
 
-配置方面，只支持 entry 和 output。
+为了方便讲解，`配置方面`我们打算只支持 entry 和 output。
 
-模块方面仅仅只是 es6 模块方案，且仅支持相对路径引用，后缀不可省略。
+`模块方面`仅仅只是 es6 模块方案，且仅支持相对路径引用，后缀不可省略。
+
+> 后缀会再后续增加解析器（resolver）的时候添加该功能
 
 ### 热身
 
@@ -40,7 +42,9 @@ nodejs 有很多同步异步版本的 api，很明显这个 api 就是这样。
 套路是异步版本的名字后面加 Sync。比如`fs.readFile`是异步读取文件的，`fs.readFileSync`则是同步读取文件的。关于同步和异步的区别，如果不清楚，
 请自行查阅相关资料。
 
-完整的函数签名是`fs.readFileSync(path[, options])`,其中 path 是一个绝对路径。函数签名的详细参数介绍可以直接访问官网查看。
+readFileSync 的完整的函数签名是`fs.readFileSync(path[, options])`,其中 path 是一个绝对路径。
+
+> 函数签名的详细参数介绍可以直接访问官网查看。
 
 它的作用就是同步读取一个文件，并将`文件内容以返回值的形式返回`。
 
@@ -101,6 +105,8 @@ __dirname === path.dirname(); // true
 它的功能非常丰富，在这里我用它将代码转化为 AST(抽象语法树)。
 如果对这个概念不是很熟悉的，建议先学习（至少知道做了什么）再继续往下看。
 
+这里有一个[在线的交互式场景](https://astexplorer.net/)，展示了我们的代码是转化成的 ast 是怎么样的。
+
 #### babel-core
 
 babel-core 是 babel 的核心模块，它提供了很多插件和 preset 扩展它的功能，
@@ -115,7 +121,11 @@ babel-core 是 babel 的核心模块，它提供了很多插件和 preset 扩展
 
 有了上面的知识了，我们就着手开始实现了。
 我们要实现打包的方法，我将其命名为`bundle`.
-那么 bundle 做的就是两件事情， 一件事是构建 modules（需要大家对 es6 模块有了解），另一件是将生成的代码（字符串）输出（根据配置的 output）。
+那么 bundle 做的就是两件事情，
+
+- 一件事是构建 modules（需要大家对 es6 模块有了解）
+
+- 另一件是将生成的代码（字符串）输出（根据配置的 output）。
 
 输出的代码比较简单，直接调用 nodejs fs api 就可以了。
 
@@ -215,6 +225,27 @@ function createModules(id, module) {
 ```
 
 到这里我们已经得到了 modules 数组。
+
+ta 大概长这样：
+
+```json
+[
+  {
+    "dependencies": ["./a.js"],
+    "id": 0,
+    "filename": "/Users/lucifer/code/index.js",
+    "code": "you code here",
+    "mapping": {}
+  },
+  {
+    "dependencies": [],
+    "id": 1,
+    "filename": "/Users/lucifer/code/index.js",
+    "code": "your code here",
+    "mapping": {}
+  }
+]
+```
 
 #### 输出代码
 
