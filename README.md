@@ -156,7 +156,7 @@ function bundle(options) {
 
 我们来看下转化 module 中最重要的`createModule`方法。它接受两个参数一个是 id，另一个是绝对路径。
 
-我们通过绝对路径来读取文件内容，然后使用`babylon`将其转化为`ast`，然后使用`babel-babylon`进行遍历,
+我们通过绝对路径来读取文件内容，然后使用`babylon`将其转化为`ast`，然后使用`babel-traverse`进行遍历,
 目的其实就是为了找出该模块的依赖，然后继续递归调用，知道找到所有代码，这就是传说中的依赖树（图）。
 
 > id 会被用到后面 require 使用。
