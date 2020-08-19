@@ -174,13 +174,13 @@ const applyLoaders = (fullpath, rules, content) => {
 
 另外我自己写了一个 loader`customLoader`,代码就一行，功能也很简单就是将单行注释给删除掉。
 
-完整示例代码如下：
+完整使用示例代码如下：
 
 ```js
 // 这是我们的webpack核心代码
 const { bundle } = require("../../src/main");
 // 这是我找的网上的一个loader
-// 我们要把它应用到我们的webpack来替换原油的babel-core的功能
+// 我们要把它应用到我们的webpack来替换原有的babel-core的功能
 const babelLoader = require("6to5-loader");
 
 // 这个是我写的一个自定义的loader
@@ -211,8 +211,7 @@ bundle({
 });
 ```
 
-运行上面的代码，会在 dist 目录输出一个 bundle.js. 并且代码
-会先去除行内注释，然后转译为 es5.
+运行上面的代码，会在 dist 目录输出一个 bundle.js. 并且代码会先去除行内注释，然后转译为 es5.
 
 ## 总结
 
