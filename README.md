@@ -80,7 +80,7 @@ function bundle(options) {
   // 构建所有模块(modules)
   const modules = [entryModule].concat(
 +   createModules(id, entryModule, module.rules)
--   createModules(id, entryModule, module.rules)
+-   createModules(id, entryModule)
   );
   // 输出环节
   const emit = compose(
